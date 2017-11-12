@@ -1,0 +1,35 @@
+/* ... */
+
+#ifndef BAC_CONF_H
+#define BAC_CONF_H
+
+#define BACNET_PROTOCOL_VERSION  1
+#define BACNET_PROTOCOL_REVISION 4
+
+/* MSTP constants */
+#define MAC_SIZE_MAX 7
+#define MAC_LOCAL_ADDRESS_LEN 1
+#define MSTP_OVERHEAD_SIZE 10
+#define MSTP_HEADER_SIZE 8
+
+/* MSTP variables */
+#define MSTP_PDU_SIZE (MAX_NPDU_SIZE + MSTP_OVERHEAD_SIZE)
+
+/* NPDU constants */
+#define NPDU_HEADER_MAX 26
+
+/* NPDU variables */
+#define MAX_NPDU_SIZE (MAX_APDU_LEN + NPDU_HEADER_MAX)
+
+
+/* APDU variables */
+#define MAX_APDU_LEN 360
+
+
+#define SUPPORTED_SEGMENTATION SEGMENTATION_TRANSMIT
+#define MAX_SEGMENTS_ACCEPTED 1
+#define APDU_SEGMENT_TIMEOUT  2000
+
+
+#endif
+
