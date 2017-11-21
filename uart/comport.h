@@ -16,7 +16,7 @@ public:
 public:
 	bool Open(const string& path);
 	bool Set(int baud, char parity, int bsize, int stop);
-	virtual int  Recv(char *buf, int len);
+	virtual int  Recv(unsigned char *buf, const int len);
 	virtual int  Send(const unsigned char *data, const int len);
 	bool Block(bool b);
 	bool Close(void);

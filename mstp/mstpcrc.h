@@ -40,7 +40,7 @@
 extern const unsigned char MSTPHeaderCRC_table[256];
 extern const unsigned short MSTPDataCRC_table[256];
 
-#define CRC_Calc_Header(hdata, crc) (MSTPHeaderCRC_table[hdata ^ crc])
-#define CRC_Calc_Data(pdata, crc) ((crc >> 8) ^ MSTPDataCRC_table[pdata ^ (crc & 0xff)])
+#define CRC_Calc_Header(hdata, crc)	(MSTPHeaderCRC_table[hdata ^ crc])
+#define CRC_Calc_Data(pdata, crc)	((crc >> 8) ^ MSTPDataCRC_table[pdata ^ (crc & 0xff)])
 
 #endif

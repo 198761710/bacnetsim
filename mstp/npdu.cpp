@@ -47,16 +47,18 @@
 
 
 /***************************************************************/
-unsigned char parse_npdu(unsigned char *pdu, unsigned short pdulen, Bacnet_npdu_t *npdu)
+unsigned char parse_npdu(unsigned char *pdu, 
+						 unsigned short pdulen, 
+						 Bacnet_npdu_t *npdu)
 {
     unsigned short i = 0;
 	unsigned short j = 0;
 
-    if( pdu==NULL )
+    if( pdu == NULL )
 	{
 		return NPDU_ERR_NO_PDU;
 	}
-    if( npdu==NULL )
+    if( npdu == NULL )
 	{
 		return NPDU_ERR_NO_NPDU;
 	}
@@ -64,18 +66,16 @@ unsigned char parse_npdu(unsigned char *pdu, unsigned short pdulen, Bacnet_npdu_
     npdu->data_len = pdulen;
     npdu->version = pdu[0];
     npdu->control = pdu[1];
-    i=2;
+    i = 2;
 
     if( npdu_is_net_msg(npdu->control) )
     {
         /* This IS a network message */
         return NPDU_MSG_NETWORK_MSG;
-
     }
     else
     {
         /* This is NOT a network message */
-
         /* Destination address */
         if (npdu_has_dest(npdu->control))
         {
@@ -85,8 +85,8 @@ unsigned char parse_npdu(unsigned char *pdu, unsigned short pdulen, Bacnet_npdu_
 			{
 				return NPDU_ERR_BAD_MAC_SIZE;
 			}
-            i+=3;
-            for (j=0; j<npdu->dest.len; j++)
+            i += 3;
+            for(j = 0; j < npdu->dest.len; j++)
             {
                 npdu->dest.mac[j] = pdu[i];
                 i++;
@@ -99,16 +99,16 @@ unsigned char parse_npdu(unsigned char *pdu, unsigned short pdulen, Bacnet_npdu_
         }
 
         /* Source address */
-        if (npdu_has_src(npdu->control))
+        if( npdu_has_src(npdu->control) )
         {
             npdu->src.net = (pdu[i] * 256) + pdu[i+1];
             npdu->src.len = pdu[i+2];
-            if (npdu->src.len > MAC_SIZE_MAX)
+            if( npdu->src.len > MAC_SIZE_MAX )
 			{
 				return NPDU_ERR_BAD_MAC_SIZE;
 			}
-            i+=3;
-            for (j=0; j<npdu->src.len; j++)
+            i += 3;
+            for(j = 0; j < npdu->src.len; j++)
             {
                 npdu->src.mac[j] = pdu[i];
                 i++;
@@ -121,7 +121,7 @@ unsigned char parse_npdu(unsigned char *pdu, unsigned short pdulen, Bacnet_npdu_
         }
 
         /* Hop Count */
-        if (npdu_has_dest(npdu->control))
+        if( npdu_has_dest(npdu->control) )
         {
             npdu->hop_count = pdu[i];
             i++;
@@ -134,7 +134,6 @@ unsigned char parse_npdu(unsigned char *pdu, unsigned short pdulen, Bacnet_npdu_
 
     return 0;
 }
-
 
 /***************************************************************/
 void init_npdu(Bacnet_npdu_t *npdu)
@@ -227,7 +226,7 @@ unsigned char add_npdu_header
 
     npdu->data[0] = BACNET_PROTOCOL_VERSION;
     npdu->data[1] = npdu->control;
-    i=2;
+    i = 2;
 
 
 
@@ -238,40 +237,39 @@ unsigned char add_npdu_header
         npdu->data[i+1] = dest->net & 0x00ff;
         npdu->data[i+2] = dest->len;
         if (dest->len > MAC_SIZE_MAX) return NPDU_ERR_BAD_MAC_SIZE;
-        i+=3;
-        for (j=0; j<dest->len; j++)
+        i += 3;
+        for(j = 0; j < dest->len; j++)
         {
             npdu->data[i] = dest->mac[j];
             i++;
         }
-
     }
 
-    if (npdu_has_src(npdu->control))
+    if( npdu_has_src(npdu->control) )
     {
         /* Add Source address */
         npdu->data[i] = (src->net & 0xff00) >> 8;
         npdu->data[i+1] = src->net & 0x00ff;
         npdu->data[i+2] = src->len;
-        if (src->len > MAC_SIZE_MAX) return NPDU_ERR_BAD_MAC_SIZE;
-        i+=3;
-        for (j=0; j<src->len; j++)
+        if( src->len > MAC_SIZE_MAX )
+		{
+			return NPDU_ERR_BAD_MAC_SIZE;
+		}
+        i += 3;
+        for(j = 0; j < src->len; j++)
         {
             npdu->data[i] = src->mac[j];
             i++;
         }
     }
 
-    if (npdu_has_dest(npdu->control))
+    if( npdu_has_dest(npdu->control) )
     {
         /* Add Hop Count */
         npdu->data[i] = npdu->hop_count; /* should be 0xff */
         i++;
     }
-
     npdu->data_len += header_size;
 
     return 0;
 }
-
-

@@ -1015,4 +1015,3 @@ enum BacnetApplServ
 #define BACNET_SERV_SUPP_BSTR_LEN ((BACNET_LAST_SERV_SUPP_BIT / 8) + 1)
 
 #endif /* end of BACENUM_H */
-

@@ -1,42 +1,42 @@
 #include <stdio.h>
 #include <string.h>
 #include "mstpcrc.h"
-#include "mstpframe.h"
+#include "recvframe.h"
 
-MstpFrame::MstpFrame(void):start(buffer),index(0)
+RecvFrame::RecvFrame(void):start(buffer),index(0)
 {
 	memset(buffer, 0, size());
 }
-int MstpFrame::udiff(void)
+int RecvFrame::udiff(void)
 {
 	return t.udiff();
 }
-int MstpFrame::mdiff(void)
+int RecvFrame::mdiff(void)
 {
 	return t.mdiff();
 }
-void MstpFrame::clear(void)
+void RecvFrame::clear(void)
 {
 	index = 0;
 	start = buffer;
 }
-int MstpFrame::size(void)
+int RecvFrame::size(void)
 {
 	return sizeof(buffer);
 }
-int MstpFrame::space(void)
+int RecvFrame::space(void)
 {
 	return size() - index;
 }
-int MstpFrame::length(void)
+int RecvFrame::length(void)
 {
 	return (buffer+index) - start;
 }
-int MstpFrame::headlength(void)
+int RecvFrame::headlength(void)
 {
 	return FrameNpdu;
 }
-int MstpFrame::datalength(void)
+int RecvFrame::datalength(void)
 {
 	if( length() <= headlength() )
 	{
@@ -44,19 +44,19 @@ int MstpFrame::datalength(void)
 	}
 	return length() - headlength();
 }
-unsigned char* MstpFrame::apdu(void)
+unsigned char* RecvFrame::apdu(void)
 {
 	return &start[FrameApdu];
 }
-unsigned char* MstpFrame::npdu(void)
+unsigned char* RecvFrame::npdu(void)
 {
 	return &start[FrameNpdu];
 }
-unsigned char* MstpFrame::frame(void)
+unsigned char* RecvFrame::data(void)
 {
 	return start;
 }
-bool MstpFrame::push(unsigned char c)
+bool RecvFrame::push(unsigned char c)
 {
 	if( space() < 1 )
 	{
@@ -72,7 +72,7 @@ bool MstpFrame::push(unsigned char c)
 	start[index++] = c;
 	return true;
 }
-bool MstpFrame::push(unsigned char *buf, int len)
+bool RecvFrame::push(unsigned char *buf, int len)
 {
 	if( len > space() )
 	{
@@ -89,7 +89,7 @@ bool MstpFrame::push(unsigned char *buf, int len)
 	index += len;
 	return true;
 }
-bool MstpFrame::Check(void)
+bool RecvFrame::Check(void)
 {
 	if( CheckHead() && CheckData() )
 	{
@@ -102,7 +102,7 @@ bool MstpFrame::Check(void)
 	}
 	return false;
 }
-bool MstpFrame::CheckHead(void)
+bool RecvFrame::CheckHead(void)
 {
 	if( length() < FrameNpdu )
 	{
@@ -134,7 +134,7 @@ bool MstpFrame::CheckHead(void)
 	}
 	return true;
 }
-bool MstpFrame::CheckData(void)
+bool RecvFrame::CheckData(void)
 {
 	if( length() == headlength() )
 	{
@@ -158,7 +158,7 @@ bool MstpFrame::CheckData(void)
 	}
 	return true;
 }
-void MstpFrame::ShowHead(void)
+void RecvFrame::ShowHead(void)
 {
 	int len = headlength();
 
@@ -175,7 +175,7 @@ void MstpFrame::ShowHead(void)
 		printf("\b]\n");
 	}
 }
-void MstpFrame::ShowData(void)
+void RecvFrame::ShowData(void)
 {
 	int len = datalength();
 	unsigned char *p = npdu();
@@ -193,7 +193,11 @@ void MstpFrame::ShowData(void)
 		printf("\b]\n");
 	}
 }
-void MstpFrame::ShowFrame(void)
+void RecvFrame::showhex(void)
+{
+	ShowFrame();
+}
+void RecvFrame::ShowFrame(void)
 {
 	int len = length();
 	unsigned char *p = start;
@@ -212,31 +216,31 @@ void MstpFrame::ShowFrame(void)
 	}
 
 }
-unsigned short MstpFrame::GetFrameHeader(void)
+unsigned short RecvFrame::GetFrameHeader(void)
 {
 	return (start[FrameHeaderH] << 8) | (start[FrameHeaderL] << 0);
 }
-unsigned char MstpFrame::GetFrameType(void)
+unsigned char RecvFrame::GetFrameType(void)
 {
 	return start[FrameType];
 }
-unsigned char MstpFrame::GetFrameDst(void)
+unsigned char RecvFrame::GetFrameDst(void)
 {
 	return start[FrameDst];
 }
-unsigned char MstpFrame::GetFrameSrc(void)
+unsigned char RecvFrame::GetFrameSrc(void)
 {
 	return start[FrameSrc];
 }
-unsigned short MstpFrame::GetFrameDataLen(void)
+unsigned short RecvFrame::GetFrameDataLen(void)
 {
 	return (start[FrameDataLenH] << 8) | (start[FrameDataLenL]);
 }
-unsigned char MstpFrame::GetFrameHeadCrc(void)
+unsigned char RecvFrame::GetFrameHeadCrc(void)
 {
 	return start[FrameHeadCrc];
 }
-unsigned short MstpFrame::GetFrameDataCrc(void)
+unsigned short RecvFrame::GetFrameDataCrc(void)
 {
 	int len = GetFrameDataLen();
 	if( len == 0 )
@@ -250,40 +254,40 @@ unsigned short MstpFrame::GetFrameDataCrc(void)
 	len = length() % size();
 	return (start[len-2] << 0) | (start[len-1] << 8);
 }
-void MstpFrame::SetFrameHeader(unsigned short header)
+void RecvFrame::SetFrameHeader(unsigned short header)
 {
 	start[FrameHeaderH] = 0xff & (header >> 8);
 	start[FrameHeaderL] = 0xff & (header >> 0);
 }
-void MstpFrame::SetFrameType(unsigned char type)
+void RecvFrame::SetFrameType(unsigned char type)
 {
 	start[FrameType] = type;
 }
-void MstpFrame::SetFrameDst(unsigned char dst)
+void RecvFrame::SetFrameDst(unsigned char dst)
 {
 	start[FrameDst] = dst;
 }
-void MstpFrame::SetFrameSrc(unsigned char src)
+void RecvFrame::SetFrameSrc(unsigned char src)
 {
 	start[FrameSrc] = src;
 }
-void MstpFrame::SetFrameDataLen(unsigned short len)
+void RecvFrame::SetFrameDataLen(unsigned short len)
 {
 	start[FrameDataLenH] = (len >> 8);
 	start[FrameDataLenL] = (len >> 0);
 }
-void MstpFrame::SetFrameHeadCrc(unsigned char crc)
+void RecvFrame::SetFrameHeadCrc(unsigned char crc)
 {
 	start[FrameHeadCrc] = crc;
 }
-void MstpFrame::SetFrameDataCrc(unsigned short crc)
+void RecvFrame::SetFrameDataCrc(unsigned short crc)
 {
 	int len = GetFrameDataLen() % (size() - (start - buffer));
 
 	start[len-2] = 0xff & (crc >> 0);
 	start[len-1] = 0xff & (crc >> 8);
 }
-unsigned char MstpFrame::CalcHeadCrc(void)
+unsigned char RecvFrame::CalcHeadCrc(void)
 {
 	unsigned char crc8 = 0xFF;
 
@@ -293,7 +297,7 @@ unsigned char MstpFrame::CalcHeadCrc(void)
 	}
 	return ~crc8;
 }
-unsigned short MstpFrame::CalcDataCrc(void)
+unsigned short RecvFrame::CalcDataCrc(void)
 {
 	int len = length() % size() - 2;
 	unsigned short crc16 = 0xFFFF;

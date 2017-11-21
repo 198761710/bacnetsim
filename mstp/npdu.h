@@ -39,7 +39,6 @@
 #define BACNET_NPDU_H
 #include "platform.h"
 
-
 /* Control Information bits*/
 /* Bit7: Is this a network layer message or an APDU */
 #define CONTROL_NET_MSG 0x80
@@ -103,7 +102,9 @@ typedef struct
 #define NPDU_MSG_NETWORK_MSG         0x10
 
 
-unsigned char parse_npdu(unsigned char *pdu, unsigned short pdulen, Bacnet_npdu_t *npdu);
+unsigned char parse_npdu(unsigned char *pdu, 
+						 unsigned short pdulen, 
+						 Bacnet_npdu_t *npdu);
 
 void init_npdu(Bacnet_npdu_t *npdu);
 void init_npdu_data(Bacnet_npdu_t *npdu);

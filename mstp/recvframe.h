@@ -24,13 +24,13 @@ typedef enum
 	FrameTypePollMaster = 1,
 	FrameTypePollMasterAck = 2,
 	FrameTypeTestRequest = 3,
-	FrameTypeTestResponse = 4,
+	FrameTypeTestRequestAck = 4,
 	FrameTypeDataRequest = 5,
-	FrameTypeDataResponse = 6,
+	FrameTypeDataRequestAck = 6,
 	FrameTypeReplyPostpened = 7,
 }FrameTypeDef;
 
-class MstpFrame
+class RecvFrame
 {
 protected:
 	TimeOperator t;
@@ -38,7 +38,7 @@ protected:
 	unsigned char *start;
 	unsigned char buffer[1024];
 public:
-	MstpFrame(void);
+	RecvFrame(void);
 public:
 	int size(void);
 	int mdiff(void);
@@ -52,8 +52,9 @@ public:
 	bool push(unsigned char *buf, int len);
 	unsigned char* apdu(void);
 	unsigned char* npdu(void);
-	unsigned char* frame(void);
+	unsigned char* data(void);
 public:
+	void showhex(void);
 	void ShowHead(void);
 	void ShowData(void);
 	void ShowFrame(void);

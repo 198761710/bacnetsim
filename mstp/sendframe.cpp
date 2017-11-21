@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include "conf.h"
 #include "npdu.h"
-#include "mstp.h"
+#include "sendframe.h"
 #include "bacenum.h"
 #include "mstpcrc.h"
 #include "make_apdu.h"
@@ -21,14 +21,15 @@
 #define Tusage_timeout 30
 #define AUTO_BOUD_BAUD_FOUND 100
 
-Mstp::Mstp(void):m_length(0)
+SendFrame::SendFrame(void):m_length(0)
 {
 	for(unsigned int i = 0; i < sizeof(buffer); i++)
 	{
 		buffer[i] = 0;
 	}
 }
-void Mstp::showhex(void)
+
+void SendFrame::showhex(void)
 {
 	printf("[");
 	for(unsigned int i = 0; i < m_length; i++)
@@ -37,7 +38,8 @@ void Mstp::showhex(void)
 	}
 	printf("\b]\n");
 }
-bool Mstp::MakeReadProperty
+
+bool SendFrame::MakeReadProperty
 (
 	unsigned char dst,
 	unsigned char src,
@@ -70,7 +72,8 @@ bool Mstp::MakeReadProperty
 					npdu->data,
 					npdu->data_len);
 }
-bool Mstp::MakeWritePropertyReal
+
+bool SendFrame::MakeWritePropertyReal
 (
 	unsigned char dst,
 	unsigned char src,
@@ -103,7 +106,8 @@ bool Mstp::MakeWritePropertyReal
 					npdu->data,
 					npdu->data_len);
 }
-bool Mstp::MakeWritePropertyEnum
+
+bool SendFrame::MakeWritePropertyEnum
 (
 	unsigned char dst,
 	unsigned char src,
@@ -138,7 +142,11 @@ bool Mstp::MakeWritePropertyEnum
 }
 
 
-bool Mstp::MakeFrame(unsigned char frame_type, unsigned char dst, unsigned char src, unsigned char *data, unsigned short data_len)
+bool SendFrame::MakeFrame(unsigned char frame_type, 
+						  unsigned char dst, 
+						  unsigned char src, 
+						  unsigned char *data, 
+						  unsigned short data_len)
 {
     unsigned int index = 0; 
     unsigned char crc8 = 0xFF; 
@@ -191,7 +199,11 @@ bool Mstp::MakeFrame(unsigned char frame_type, unsigned char dst, unsigned char 
 
     return !!(m_length = index);
 }
-bool Mstp::ReadReal(unsigned char dst, unsigned char src, unsigned char id, unsigned int instance)
+
+bool SendFrame::ReadReal(unsigned char dst, 
+						 unsigned char src, 
+						 unsigned char id, 
+						 unsigned int instance)
 {
 	return MakeReadProperty(dst, 
 							src, 
@@ -200,7 +212,12 @@ bool Mstp::ReadReal(unsigned char dst, unsigned char src, unsigned char id, unsi
 							instance, 
 							PROP_PRESENT_VALUE);
 }
-bool Mstp::WriteReal(unsigned char dst, unsigned char src, unsigned char id, unsigned int instance, REAL value)
+
+bool SendFrame::WriteReal(unsigned char dst, 
+						  unsigned char src, 
+						  unsigned char id, 
+						  unsigned int instance, 
+						  REAL value)
 {
 	return MakeWritePropertyReal(dst, 
 								src, 
@@ -210,7 +227,12 @@ bool Mstp::WriteReal(unsigned char dst, unsigned char src, unsigned char id, uns
 								PROP_PRESENT_VALUE,
 								value);
 }
-bool Mstp::WriteEnum(unsigned char dst, unsigned char src, unsigned char id, unsigned int instance, unsigned char value)
+
+bool SendFrame::WriteEnum(unsigned char dst, 
+						  unsigned char src, 
+						  unsigned char id, 
+						  unsigned int instance, 
+						  unsigned char value)
 {
 	return MakeWritePropertyEnum(dst, 
 								src, 

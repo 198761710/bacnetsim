@@ -36,9 +36,9 @@ bool ComPort::Set(int baud, char parity, int bsize, int stop)
 	}
 	return (uart_config(fd, baud, parity, bsize, stop) == 0);
 }
-int ComPort::Recv(char *buf, int len)
+int ComPort::Recv(unsigned char *buf, const int len)
 {
-	return uart_read(fd, buf, len);
+	return uart_read(fd, (char *)buf, len);
 }
 int  ComPort::Send(const unsigned char *data, const int len)
 {

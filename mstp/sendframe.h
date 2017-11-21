@@ -99,17 +99,20 @@ typedef enum
 #define WRITE_ERR_WRONG_MAC   0x0800
 #define WRITE_ERR_PREEMTIED   0x1000
 
-class Mstp
+class SendFrame 
 {
 protected:
 	unsigned char buffer[512];
 	unsigned int m_length;
+
 public:
-	Mstp(void);
+	SendFrame(void);
+
 public:
 	void showhex(void);
 	const unsigned char* data(void)const{return buffer;}
 	const unsigned int length(void)const{return m_length;}
+
 protected:
 	bool MakeReadProperty(unsigned char dst,
 						  unsigned char src,
@@ -117,6 +120,7 @@ protected:
 						  unsigned short object_type,
 						  unsigned int object_instance,
 						  unsigned char property);
+
 	bool MakeWritePropertyReal(unsigned char dst,
 						   unsigned char src,
 						   unsigned char invokeId,
@@ -124,6 +128,7 @@ protected:
 						   unsigned int object_instance,
 						   unsigned char property,
 						   REAL value);
+
 	bool MakeWritePropertyEnum(unsigned char dst,
 						   unsigned char src,
 						   unsigned char invokeId,
@@ -138,9 +143,21 @@ protected:
 				  unsigned char *data, 
 				  unsigned short data_len);
 public:
-	bool ReadReal(unsigned char dst, unsigned char src, unsigned char id, unsigned int instance);
-	bool WriteReal(unsigned char dst, unsigned char src, unsigned char id, unsigned int instance, float value);
-	bool WriteEnum(unsigned char dst, unsigned char src, unsigned char id, unsigned int instance, unsigned char value);
-};
+	bool ReadReal(unsigned char dst, 
+				  unsigned char src, 
+				  unsigned char id, 
+				  unsigned int instance);
 
+	bool WriteReal(unsigned char dst, 
+				   unsigned char src, 
+				   unsigned char id, 
+				   unsigned int instance, 
+				   float value);
+
+	bool WriteEnum(unsigned char dst, 
+				   unsigned char src, 
+				   unsigned char id, 
+				   unsigned int instance, 
+				   unsigned char value);
+};
 #endif

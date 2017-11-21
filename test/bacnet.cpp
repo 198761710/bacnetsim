@@ -1,155 +1,38 @@
-#include <sys/types.h>
-#include <string.h>
-#include "mstp.h"
-#include "comport.h"
-#include "mstpframe.h"
-#include "platform.h"
+#include <stdio.h>
+#include "bacnet.h"
 
-static Mstp mstp;
-static ComPort com;
-static TimeOperator t;
-static TimeOperator s;
-static unsigned char invokeid = 0x01;
-
-bool ProcFrameTypeToken(MstpFrame &frame)
+void InitBacnet(Bacnet& b)
 {
-	unsigned char dst = frame.GetFrameDst();
-	unsigned char src = frame.GetFrameSrc();
-	mstp.ReadReal(src, dst, invokeid++, 102);
-	com.Send(mstp.data(), (int)mstp.length());
-	printf("[%5d].send:", t.mdiff());
-	mstp.showhex();
-	return true;
-}
-bool ProcFrameTypePollMaster(MstpFrame &frame)
-{
-	unsigned char dst = frame.GetFrameDst();
-	unsigned char src = frame.GetFrameSrc();
-
-	frame.SetFrameType(FrameTypePollMasterAck);
-	frame.SetFrameDst(src);
-	frame.SetFrameSrc(dst);
-	frame.SetFrameHeadCrc(frame.CalcHeadCrc());
-	com.Send(frame.frame(), frame.headlength());
-	printf("[%5d].send:", t.mdiff());
-	frame.ShowFrame();
-	return true;
-}
-bool ProcFrameTypePollMasterAck(MstpFrame &frame)
-{
-	unsigned char dst = frame.GetFrameDst();
-	unsigned char src = frame.GetFrameSrc();
-
-	frame.SetFrameType(0x02);
-	frame.SetFrameDst(src);
-	frame.SetFrameSrc(dst);
-	frame.SetFrameHeadCrc(frame.CalcHeadCrc());
-	return true;
-}
-bool ProcFrameTypeTestRequest(MstpFrame &frame)
-{
-	return false;
-}
-bool ProcFrameTypeTestResponse(MstpFrame &frame)
-{
-	return false;
-}
-bool ProcFrameTypeDataRequest(MstpFrame &frame)
-{
-	return false;
-}
-bool ProcFrameTypeDataResponse(MstpFrame &frame)
-{
-	return false;
-}
-
-bool ProcFrame(MstpFrame& frame)
-{
-	switch( frame.GetFrameType() )
-	{
-	case FrameTypeToken:
-		return ProcFrameTypeToken(frame);
-	case FrameTypePollMaster:
-		return ProcFrameTypePollMaster(frame);
-	case FrameTypePollMasterAck:
-		return ProcFrameTypePollMasterAck(frame);
-	case FrameTypeTestRequest:
-		return ProcFrameTypeTestRequest(frame);
-	case FrameTypeTestResponse:
-		return ProcFrameTypeTestResponse(frame);
-	case FrameTypeDataRequest:
-		return ProcFrameTypeDataRequest(frame);
-	case FrameTypeDataResponse:
-		return ProcFrameTypeDataResponse(frame);
-	}
-	return false;
-}
-bool PollMaster(MstpFrame &frame)
-{
-	static char master = 0x01;
-
-	if( frame.mdiff() > 1000 )
-	{
-		unsigned char buf[] = {
-			0x55, 0xff, 0x01, master++ % 0x7F, 0x7F, 0, 0, 0
-		};
-		frame.clear();
-		frame.push(buf, sizeof(buf));
-		frame.SetFrameHeadCrc(frame.CalcHeadCrc());
-		return true;
-	}
-	return false;
+	b.PushBack(Instance(1, 'r', 'A', 102, 0, 0.0));
+	b.PushBack(Instance(1, 'r', 'A', 103, 0, 0.0));
+	b.PushBack(Instance(1, 'r', 'A', 104, 0, 0.0));
+	b.PushBack(Instance(1, 'r', 'A', 1013, 0, 0.0));
+	b.PushBack(Instance(1, 'r', 'A', 1015, 0, 0.0));
+	b.PushBack(Instance(1, 'r', 'B', 203, 0, 0.0));
+	b.PushBack(Instance(1, 'r', 'B', 103, 0, 0.0));
 }
 
 int main(int argc, char **argv)
 {
-	MstpFrame frame;
-	char buf[32] = {0};
-	int len = sizeof(buf);
-	string dev = "/dev/ttySX0";
+	Bacnet bacnet;
+	string comdev = "/dev/ttySX0";
 
-	if( argc > 1 )
+	if( bacnet.OpenCom(comdev) == false )
 	{
-		dev = argv[1];
+		return -printf("OpenCom(%s) failed\n", comdev.data());
 	}
-	if( com.Open(dev) == false )
+	if( bacnet.SetCom(9600, 0, 8, 1)  == false )
 	{
-		printf("open failed!\n");
-		return -1;
+		return -printf("SetCom(9600, N, 8, 1) failed\n");
 	}
-	if( com.Set(9600, 0, 8, 1) == false )
-	{
-		printf("set failed!\n");
-		return -1;
-	}
-	com.Block(false);
 
 	while(1)
 	{
-		len = com.Recv(buf, sizeof(buf));
-		for(int i = 0; i < len; i++)
+		if( bacnet.Empty() )
 		{
-			frame.push((unsigned char)buf[i]);
-			if( frame.Check() )
-			{
-				printf("[%5d].recv:", t.mdiff());
-				frame.ShowFrame();
-				if( ProcFrame(frame) )
-				{
-				}
-				frame.clear();
-				t.init();
-				continue;
-			}
+			InitBacnet(bacnet);
 		}
-		if( PollMaster(frame) )
-		{
-			com.Send(frame.frame(), frame.headlength());
-			printf("[%5d].send:", s.mdiff());
-			frame.ShowFrame();
-			frame.clear();
-			s.init();
-		}
+		bacnet.Run();
 		usleep(100);
 	}
 

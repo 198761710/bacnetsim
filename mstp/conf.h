@@ -1,5 +1,3 @@
-/* ... */
-
 #ifndef BAC_CONF_H
 #define BAC_CONF_H
 
@@ -21,15 +19,11 @@
 /* NPDU variables */
 #define MAX_NPDU_SIZE (MAX_APDU_LEN + NPDU_HEADER_MAX)
 
-
 /* APDU variables */
 #define MAX_APDU_LEN 360
-
 
 #define SUPPORTED_SEGMENTATION SEGMENTATION_TRANSMIT
 #define MAX_SEGMENTS_ACCEPTED 1
 #define APDU_SEGMENT_TIMEOUT  2000
 
-
 #endif
-

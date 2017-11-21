@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "mstpframe.h"
+#include "recvframe.h"
 
 
 void frame1(void)
@@ -11,7 +11,7 @@ void frame1(void)
 		0xC4, 0x02, 0x00, 0x00, 0x08, 0x21, 0xCE, 0x91, 
 		0x03, 0x21, 0x11, 0xE4, 0x41
 	};
-	MstpFrame frame;
+	RecvFrame frame;
 	frame.push(buf, sizeof(buf));
 	frame.SetFrameHeadCrc(frame.CalcHeadCrc());
 	frame.ShowHead();
@@ -26,7 +26,7 @@ void frame2(void)
 	{
 		0x55, 0xFF, 0x00, 0x08, 0x7F, 0x00, 0x00, 0x00
 	};
-	MstpFrame frame;
+	RecvFrame frame;
 	frame.push(buf, sizeof(buf));
 	frame.SetFrameHeadCrc(frame.CalcHeadCrc());
 	frame.ShowHead();
